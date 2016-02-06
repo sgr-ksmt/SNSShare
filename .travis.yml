@@ -8,8 +8,8 @@ env:
   - FRAMEWORK_NAME=SNSShare
 before_install:
 - brew update
-before_script:
-- carthage bootstrap
+- brew unlink carthage
+- brew install carthage
 script:
 - xctool -project SNSShare.xcodeproj -scheme SNSShare -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO
 - xcodebuild -project SNSShare.xcodeproj -scheme SNSShare -destination 'platform=iOS
