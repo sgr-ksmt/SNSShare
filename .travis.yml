@@ -8,12 +8,12 @@ env:
   - FRAMEWORK_NAME=SNSShare
 before_install:
 - brew update
-- brew install carthage
 before_script:
 - carthage bootstrap
 script:
 - xctool -project SNSShare.xcodeproj -scheme SNSShare -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO
-- xcodebuild -project SNSShare.xcodeproj -scheme SNSShare -destination 'platform=iOS Simulator,name=iPhone 6' test
+- xcodebuild -project SNSShare.xcodeproj -scheme SNSShare -destination 'platform=iOS
+  Simulator,name=iPhone 6' test
 before_deploy:
 - carthage build --no-skip-current
 - carthage archive $FRAMEWORK_NAME
@@ -26,3 +26,5 @@ deploy:
   on:
     repo: sgr-ksmt/SNSShare
     tags: true
+notifications:
+  email: false
