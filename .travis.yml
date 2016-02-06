@@ -5,6 +5,7 @@ xcode_scheme: SNSShare
 xcode_sdk: iphonesimulator9.2
 env:
   global:
+  - DESTINATION="platform=iOS Simulator,name=iPhone 6, OS=9.1"
   - FRAMEWORK_NAME=SNSShare
 before_install:
   - brew update
@@ -13,8 +14,8 @@ before_install:
 script:
   - pod lib lint
   - set -o pipefail
-  - xctool -project SNSShare.xcodeproj -scheme SNSShare -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO | xcpretty -c
-  - xcodebuild -project SNSShare.xcodeproj -scheme SNSShare -destination 'platform=iOS Simulator,name=iPhone 6' test | xcpretty -c
+  - xctool -project $TRAVIS_XCODE_PROJECT -scheme $TRAVIS_XCODE_SCHEME -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO | xcpretty -c
+  - xcodebuild -project $TRAVIS_XCODE_PROJECT -scheme $TRAVIS_XCODE_SCHEME -destination "$DESTINATION" test | xcpretty -c
 before_deploy:
 - carthage build --no-skip-current
 - carthage archive $FRAMEWORK_NAME
