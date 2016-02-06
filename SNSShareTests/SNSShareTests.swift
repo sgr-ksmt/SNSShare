@@ -13,24 +13,32 @@ class SNSShareTests: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        // Put setup code here. This method is called before the invocation of each test method in the class.
     }
     
     override func tearDown() {
-        // Put teardown code here. This method is called after the invocation of each test method in the class.
         super.tearDown()
     }
     
-    func testExample() {
-        // This is an example of a functional test case.
-        // Use XCTAssert and related functions to verify your tests produce the correct results.
+    func testShareData() {
+        let sd1 = SNSShareData {
+            $0.text = "Share it!"
+        }
+        XCTAssertEqual(sd1.text, "Share it!")
+        
+        let sd2 = SNSShareData()
+        XCTAssertEqual(sd2.text, "")
+        
+        let sd3 = SNSShareData("wahaha!!")
+        XCTAssertEqual(sd3.text, "wahaha!!")
+        
+        let sd4 = SNSShareData([NSURL(string: "http://www.google.co.jp")!])
+        XCTAssertEqual(sd4.text, "")
+        XCTAssertEqual(sd4.urls.count, 1)
+        XCTAssertEqual(sd4.urls[0], NSURL(string: "http://www.google.co.jp")!)
+        
+        
+        
     }
     
-    func testPerformanceExample() {
-        // This is an example of a performance test case.
-        self.measureBlock {
-            // Put the code you want to measure the time of here.
-        }
-    }
     
 }
