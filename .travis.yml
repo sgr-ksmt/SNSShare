@@ -5,7 +5,7 @@ xcode_scheme: SNSShare
 xcode_sdk: iphonesimulator9.2
 env:
   global:
-  - DESTINATION="platform=iOS Simulator,name=iPhone 6, OS=9.1"
+  - DESTINATION="platform=iOS Simulator,name=iPhone 6,OS=9.1"
   - FRAMEWORK_NAME=SNSShare
 before_install:
   - brew update
