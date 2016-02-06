@@ -1,9 +1,9 @@
 # SNSShare
-
-[![Version](https://img.shields.io/cocoapods/v/SNSShare.svg?style=flat)](http://cocoapods.org/pods/SNSShare)
+[![Build Status](https://travis-ci.org/sgr-ksmt/SNSShare.svg?branch=master)](https://travis-ci.org/sgr-ksmt/SNSShare)
 [![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![License](https://img.shields.io/cocoapods/l/SNSShare.svg?style=flat)](http://cocoapods.org/pods/SNSShare)
-[![Platform](https://img.shields.io/cocoapods/p/SNSShare.svg?style=flat)](http://cocoapods.org/pods/SNSShare)
+[![Pod Version](https://img.shields.io/cocoapods/v/SNSShare.svg?style=flat)](http://cocoapods.org/pods/SNSShare)
+[![](https://img.shields.io/badge/Xcode-7.0%2B-brightgreen.svg?style=flat)]()
+[![](https://img.shields.io/badge/iOS-8.0%2B-brightgreen.svg?style=flat)]()
 
 ## Warning: iOS9
 Over *iOS9.0*,Requires `LSApplicationQueriesSchemes` for `canOpenURL`.
