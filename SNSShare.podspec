@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "SNSShare"
-  s.version      = "0.1.0"
+  s.version      = "0.2.0"
   s.summary      = "Text/Image/URL share to Twitter/Facebook/LINE from App in Swift."
 
   s.description  = <<-DESC
