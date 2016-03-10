@@ -5,6 +5,11 @@ import Foundation
 import UIKit
 import Social
 
+private struct Schemes {
+    private init() {}
+    static let LINE = "line://"
+}
+
 public enum SNSType {
     
     case Twitter, Facebook, LINE
@@ -32,7 +37,7 @@ public enum SNSType {
         if useSocialFramework() {
             return SLComposeViewController.isAvailableForServiceType(serviceType)
         } else if case .LINE = self {
-            return UIApplication.sharedApplication().canOpenURL(NSURL(string: "line://")!)
+            return UIApplication.sharedApplication().canOpenURL(NSURL(string: Schemes.LINE)!)
         }
         return false
     }
@@ -55,9 +60,9 @@ public enum SNSShareResult {
 public enum SNSShareErrorType: ErrorType {
     case NotAvailable(SNSType)
     case EmptyData
-    case Cancelled
     case URIEncodingError
     case UnknownError
+    case PresentViewControllerNotFound
 }
 
 public typealias SNSSharePostCompletion = SNSShareResult -> Void
@@ -71,13 +76,20 @@ public class SNSShareData {
     public typealias BuilderClosure = SNSShareData -> Void
     
     public init() {}
-    
     public init(@noescape builder: BuilderClosure) {
         builder(self)
     }    
     
     public var isEmpty: Bool {
         return text.isEmpty && images.isEmpty && urls.isEmpty
+    }
+    
+    public func post(type: SNSType, controller: UIViewController? = nil, completion: SNSSharePostCompletion = { _ in }) {
+        guard let presentVC = controller ?? UIApplication.topViewController() else {
+            completion(.Failure(.PresentViewControllerNotFound))
+            return
+        }
+        SNSShare.post(type, data: self, controller: presentVC, completion: completion)
     }
 }
 
@@ -90,9 +102,19 @@ public class SNSShare {
     public class func availableSNSList() -> [SNSType] {
         return SNSType.list.filter(available)
     }
-    
+
+    @available(*, deprecated, message="use `post(_:data:controller:completion` instead of it")
     public class func post(
         type type: SNSType,
+        data: SNSShareData,
+        controller: UIViewController,
+        completion: SNSSharePostCompletion = { _ in })
+    {
+        post(type, data: data, controller: controller, completion: completion)
+    }
+    
+    public class func post(
+        type: SNSType,
         data: SNSShareData,
         controller: UIViewController,
         completion: SNSSharePostCompletion = { _ in })
@@ -108,7 +130,7 @@ public class SNSShare {
         }
         
         if type.useSocialFramework() {
-            postToSocial(type.serviceType, data: data, controller: controller, completion: completion)
+            postToSocial(type, data: data, controller: controller, completion: completion)
         } else {
             if case .LINE = type {
                 postToLINE(data, completion: completion)
@@ -119,23 +141,29 @@ public class SNSShare {
     }
     
     private class func postToSocial(
-        serviceType: String,
+        type: SNSType,
         data: SNSShareData,
         controller: UIViewController,
         completion: SNSSharePostCompletion)
     {
-        let sheet = SLComposeViewController(forServiceType: serviceType)
-        sheet.completionHandler = { completion(.Success($0 == .Done)) }
+        let sheet = SLComposeViewController(forServiceType: type.serviceType)
+        sheet.completionHandler = {
+            completion(.Success($0 == .Done))
+        }
         sheet.setInitialText(data.text)
-        data.images.forEach {sheet.addImage($0) }
-        data.urls.forEach { sheet.addURL($0) }
+        data.images.forEach {
+            sheet.addImage($0)
+        }
+        data.urls.forEach {
+            sheet.addURL($0)
+        }
         controller.presentViewController(sheet, animated: true, completion: nil)
     }
     
     
     private class func postToLINE(data: SNSShareData, completion: SNSSharePostCompletion) {
         
-        var scheme = "line://msg/"
+        var scheme = Schemes.LINE + "msg/"
         if let image = data.images.first, imageData = UIImagePNGRepresentation(image) {
             let pasteboard = UIPasteboard.generalPasteboard()
             pasteboard.setData(imageData, forPasteboardType: "public.png")
