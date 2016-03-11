@@ -21,33 +21,23 @@ If you want to enable sharing to LINE, add `line` to `LSApplicationQueriesScheme
 - Create `SNSData`
 
 ```swift
-  let data = SNSShareData(
-    text: "abcdef",
-    images: [image],
-    urls: [url]
-  )
-
-  // or
-  let data = SNSShareData()
-  data.text = "abcdef"
-
-  // or
-  let data = SNSShareData(url)
+let data = SNSShareData {
+    $0.text = "text"
+    $0.images = [image]
+    $0.urls = [url]
+}
 ```
 
 - share to SNS (e.g. Twitter)
-
 ```swift
-  // call in ViewController
-  SNSShare.post(type: .Twitter, data: data, controller: self, completion: { result in
+data.post(.Twitter) { result in
     switch result {
-    case .Success:
-      print("Posted!!")
-    case .Failure(let et):
-      print(et)
+    case .Success(let posted):
+      print(posted ? "Posted!!" : "Canceled!!")
+    case .Failure(let e):
+      print(e)
     }
-  })
-
+}
 ```
 
 If a user posted share data, return result `Success` by completion closure.
@@ -61,9 +51,8 @@ Return SNS service list that user can use.
 ### ErrorType
 - *NotAvailable(SNSType)* If a user cannot share to SNS service.
 - *EmptyData* : If SNSShareData is EmptyData (has no text, image and url).
-- Cancelled : If sharing cancelled by user.
-- URIEncodingError : Failed URI encoding When select *LINE* and share text and URL.
-- UnknownError
+- *URIEncodingError* : Failed URI encoding When select *LINE* and share text and URL.
+- *UnknownError*
 
 
 #### **Demo is [here](https://github.com/sgr-ksmt/SNSShare/blob/master/Demo/)**
