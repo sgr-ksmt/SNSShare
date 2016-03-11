@@ -7,6 +7,11 @@ env:
   global:
   - DESTINATION="platform=iOS Simulator,name=iPhone 6,OS=9.1"
   - FRAMEWORK_NAME=SNSShare
+branches:
+  only:
+  - master
+  - "/^develop.*/"
+  - "/^v?[0-9\\.]+/"
 before_install:
   - brew update
   - brew unlink carthage
