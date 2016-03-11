@@ -28,14 +28,10 @@ class SNSShareTests: XCTestCase {
         let sd2 = SNSShareData()
         XCTAssertEqual(sd2.text, "")
         
-        let sd3 = SNSShareData {
-            $0.text = "wahaha!!"
-        }
+        let sd3 = SNSShareData("wahaha!!")
         XCTAssertEqual(sd3.text, "wahaha!!")
         
-        let sd4 = SNSShareData {
-            $0.urls = [NSURL(string: "http://www.google.co.jp")!]
-        }
+        let sd4 = SNSShareData([NSURL(string: "http://www.google.co.jp")!])
         XCTAssertEqual(sd4.text, "")
         XCTAssertEqual(sd4.urls.count, 1)
         XCTAssertEqual(sd4.urls[0], NSURL(string: "http://www.google.co.jp")!)
