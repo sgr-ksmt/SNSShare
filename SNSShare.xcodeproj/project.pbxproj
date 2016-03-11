@@ -7,7 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		4D0EED511C9129D600FA36EE /* UIApplication+Extension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D0EED501C9129D600FA36EE /* UIApplication+Extension.swift */; };
 		4D54A84A1C2840F70048E60C /* SNSShare.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D54A8491C2840F70048E60C /* SNSShare.swift */; };
 		4D5DA4301C28404900591483 /* SNSShare.h in Headers */ = {isa = PBXBuildFile; fileRef = 4D5DA42F1C28404900591483 /* SNSShare.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		4D5DA4371C28404900591483 /* SNSShare.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4D5DA42C1C28404900591483 /* SNSShare.framework */; };
@@ -25,7 +24,6 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		4D0EED501C9129D600FA36EE /* UIApplication+Extension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "UIApplication+Extension.swift"; sourceTree = "<group>"; };
 		4D54A8491C2840F70048E60C /* SNSShare.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SNSShare.swift; sourceTree = "<group>"; };
 		4D5DA42C1C28404900591483 /* SNSShare.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = SNSShare.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		4D5DA42F1C28404900591483 /* SNSShare.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SNSShare.h; sourceTree = "<group>"; };
@@ -78,7 +76,6 @@
 				4D5DA42F1C28404900591483 /* SNSShare.h */,
 				4D5DA4311C28404900591483 /* Info.plist */,
 				4D54A8491C2840F70048E60C /* SNSShare.swift */,
-				4D0EED501C9129D600FA36EE /* UIApplication+Extension.swift */,
 			);
 			path = SNSShare;
 			sourceTree = "<group>";
@@ -199,7 +196,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				4D0EED511C9129D600FA36EE /* UIApplication+Extension.swift in Sources */,
 				4D54A84A1C2840F70048E60C /* SNSShare.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

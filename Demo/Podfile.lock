@@ -1,14 +1,14 @@
 PODS:
-  - SNSShare (0.2.0)
+  - SNSShare (0.1.0)
 
 DEPENDENCIES:
   - SNSShare (from `../`)
 
 EXTERNAL SOURCES:
   SNSShare:
-    :path: ../
+    :path: "../"
 
 SPEC CHECKSUMS:
-  SNSShare: 8de1766f048c33e030c699c56b276456da934937
+  SNSShare: d0b190b825a48f3903317bd720bbd143b5dfea3b
 
 COCOAPODS: 0.39.0

@@ -5,17 +5,12 @@ import Foundation
 import UIKit
 import Social
 
-private struct Schemes {
-    private init() {}
-    static let LINE = "line://"
-}
-
 public enum SNSType {
     
     case Twitter, Facebook, LINE
     
     public static var list: [SNSType] {
-        return [.Twitter, .Facebook, .LINE]
+        return [SNSType.Twitter, .Facebook, .LINE]
     }
     
     public var serviceType: String {
@@ -26,43 +21,26 @@ public enum SNSType {
         }
     }
     
-    private func useSocialFramework() -> Bool {
+    public func useSocialFramework() -> Bool {
         switch self {
         case .Twitter, .Facebook: return true
         default: return false
         }
     }
     
-    private func available() -> Bool {
-        if useSocialFramework() {
-            return SLComposeViewController.isAvailableForServiceType(serviceType)
-        } else if case .LINE = self {
-            return UIApplication.sharedApplication().canOpenURL(NSURL(string: Schemes.LINE)!)
-        }
-        return false
-    }
-    
 }
 
 public enum SNSShareResult {
-    case Success(Bool)
+    case Success
     case Failure(SNSShareErrorType)
-    
-    public var done: Bool {
-        if case .Success(let done) = self {
-            return done
-        } else {
-            return false
-        }
-    }
 }
 
 public enum SNSShareErrorType: ErrorType {
     case NotAvailable(SNSType)
     case EmptyData
+    case Cancelled
     case URIEncodingError
     case UnknownError
-    case PresentViewControllerNotFound
 }
 
 public typealias SNSSharePostCompletion = SNSShareResult -> Void
@@ -73,48 +51,57 @@ public class SNSShareData {
     public var images: [UIImage] = [UIImage]()
     public var urls: [NSURL] = [NSURL]()
     
-    public typealias BuilderClosure = SNSShareData -> Void
+    public init() {
+    }
     
-    public init() {}
-    public init(@noescape builder: BuilderClosure) {
+    public init(_ text: String) {
+        self.text = text
+    }
+    
+    public init(_ images: [UIImage]) {
+        self.images = images
+    }
+    
+    public init(_ urls: [NSURL]) {
+        self.urls = urls
+    }
+    
+    public init(text: String, images: [UIImage], urls: [NSURL]) {
+        self.text = text
+        self.images = images
+        self.urls = urls
+    }
+    
+    public typealias BuilderClosure = SNSShareData -> Void
+    public init(builder: BuilderClosure) {
         builder(self)
     }    
     
     public var isEmpty: Bool {
-        return text.isEmpty && images.isEmpty && urls.isEmpty
+        return text.characters.isEmpty && images.isEmpty && urls.isEmpty
     }
     
-    public func post(type: SNSType, controller: UIViewController? = nil, completion: SNSSharePostCompletion = { _ in }) {
-        guard let presentVC = controller ?? UIApplication.topViewController() else {
-            completion(.Failure(.PresentViewControllerNotFound))
-            return
-        }
-        SNSShare.post(type, data: self, controller: presentVC, completion: completion)
-    }
 }
 
 public class SNSShare {
     
     public class func available(type: SNSType) -> Bool {
-        return type.available()
+        switch type {
+        case .Twitter:
+            return SLComposeViewController.isAvailableForServiceType(SNSType.Twitter.serviceType)
+        case .Facebook:
+            return SLComposeViewController.isAvailableForServiceType(SNSType.Facebook.serviceType)
+        case .LINE:
+            return UIApplication.sharedApplication().canOpenURL(NSURL(string: "line://")!)
+        }
     }
     
     public class func availableSNSList() -> [SNSType] {
-        return SNSType.list.filter(available)
-    }
-
-    @available(*, deprecated, message="use `post(_:data:controller:completion` instead of it")
-    public class func post(
-        type type: SNSType,
-        data: SNSShareData,
-        controller: UIViewController,
-        completion: SNSSharePostCompletion = { _ in })
-    {
-        post(type, data: data, controller: controller, completion: completion)
+        return SNSType.list.filter { available($0) }
     }
     
     public class func post(
-        type: SNSType,
+        type type: SNSType,
         data: SNSShareData,
         controller: UIViewController,
         completion: SNSSharePostCompletion = { _ in })
@@ -130,7 +117,7 @@ public class SNSShare {
         }
         
         if type.useSocialFramework() {
-            postToSocial(type, data: data, controller: controller, completion: completion)
+            postToSocial(type.serviceType, data: data, controller: controller, completion: completion)
         } else {
             if case .LINE = type {
                 postToLINE(data, completion: completion)
@@ -141,29 +128,28 @@ public class SNSShare {
     }
     
     private class func postToSocial(
-        type: SNSType,
+        serviceType: String,
         data: SNSShareData,
         controller: UIViewController,
         completion: SNSSharePostCompletion)
     {
-        let sheet = SLComposeViewController(forServiceType: type.serviceType)
-        sheet.completionHandler = {
-            completion(.Success($0 == .Done))
+        let sheet = SLComposeViewController(forServiceType: serviceType)
+        sheet.completionHandler = { result in
+            switch result {
+            case .Done: completion(.Success)
+            case .Cancelled: completion(.Failure(.Cancelled))
+            }
         }
         sheet.setInitialText(data.text)
-        data.images.forEach {
-            sheet.addImage($0)
-        }
-        data.urls.forEach {
-            sheet.addURL($0)
-        }
+        data.images.forEach {sheet.addImage($0) }
+        data.urls.forEach { sheet.addURL($0) }
         controller.presentViewController(sheet, animated: true, completion: nil)
     }
     
     
     private class func postToLINE(data: SNSShareData, completion: SNSSharePostCompletion) {
         
-        var scheme = Schemes.LINE + "msg/"
+        var scheme = "line://msg/"
         if let image = data.images.first, imageData = UIImagePNGRepresentation(image) {
             let pasteboard = UIPasteboard.generalPasteboard()
             pasteboard.setData(imageData, forPasteboardType: "public.png")
@@ -189,7 +175,7 @@ public class SNSShare {
         }
         
         UIApplication.sharedApplication().openURL(url)
-        completion(.Success(true))
+        completion(.Success)
     }
     
 }

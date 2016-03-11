@@ -72,19 +72,20 @@ class ViewController: UIViewController {
     default: return
     }
     
-    let shareData = SNSShareData {
-        $0.text = textfield.text ?? ""
-        $0.images = images
-        $0.urls = urls
-    }
-    shareData.post(shareType) { result in
-        switch result {
-        case .Success(let done):
-            print(done ? "Posted!!" : "Cancelled!")
-        case .Failure(let et):
-            print(et)
-        }
-    }
+    let data = SNSShareData(
+      text: textfield.text ?? "",
+      images: images,
+      urls: urls
+    )
+    
+    SNSShare.post(type: shareType, data: data, controller: self, completion: { result in
+      switch result {
+      case .Success:
+        print("Posted!!")
+      case .Failure(let et):
+        print(et)
+      }
+    })
     
   }
   
