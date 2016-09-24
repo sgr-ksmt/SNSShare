@@ -4,52 +4,45 @@
 import Foundation
 import UIKit
 import Social
+import Accounts
 
-public enum SNSType {
+public enum SNS {
     
-    case Twitter, Facebook, LINE
+    case twitter, facebook, line
     
-    public static var list: [SNSType] {
-        return [SNSType.Twitter, .Facebook, .LINE]
+    public static var list: [SNS] {
+        return [.twitter, .facebook, .line]
     }
     
     public var serviceType: String {
         switch self {
-        case .Twitter: return SLServiceTypeTwitter
-        case .Facebook: return SLServiceTypeFacebook
+        case .twitter: return SLServiceTypeTwitter
+        case .facebook: return SLServiceTypeFacebook
         default: return ""
         }
     }
-    
-    public func useSocialFramework() -> Bool {
-        switch self {
-        case .Twitter, .Facebook: return true
-        default: return false
-        }
-    }
-    
 }
 
 public enum SNSShareResult {
-    case Success
-    case Failure(SNSShareErrorType)
+    case success
+    case failure(SNSShareErrorType)
 }
 
-public enum SNSShareErrorType: ErrorType {
-    case NotAvailable(SNSType)
-    case EmptyData
-    case Cancelled
-    case URIEncodingError
-    case UnknownError
+public enum SNSShareErrorType: Error {
+    case notAvailable(SNS)
+    case emptyData
+    case cancelled
+    case uriEncodingError
+    case unknownError
 }
 
-public typealias SNSSharePostCompletion = SNSShareResult -> Void
+public typealias SNSSharePostCompletion = (SNSShareResult) -> Void
 
-public class SNSShareData {
+open class SNSShareData {
     
-    public var text: String = ""
-    public var images: [UIImage] = [UIImage]()
-    public var urls: [NSURL] = [NSURL]()
+    open var text: String = ""
+    open var images: [UIImage] = [UIImage]()
+    open var urls: [URL] = [URL]()
     
     public init() {
     }
@@ -62,22 +55,22 @@ public class SNSShareData {
         self.images = images
     }
     
-    public init(_ urls: [NSURL]) {
+    public init(_ urls: [URL]) {
         self.urls = urls
     }
     
-    public init(text: String, images: [UIImage], urls: [NSURL]) {
+    public init(text: String, images: [UIImage], urls: [URL]) {
         self.text = text
         self.images = images
         self.urls = urls
     }
     
-    public typealias BuilderClosure = SNSShareData -> Void
+    public typealias BuilderClosure = (SNSShareData) -> Void
     public init(builder: BuilderClosure) {
         builder(self)
     }    
     
-    public var isEmpty: Bool {
+    open var isEmpty: Bool {
         return text.characters.isEmpty && images.isEmpty && urls.isEmpty
     }
     
@@ -85,97 +78,88 @@ public class SNSShareData {
 
 public class SNSShare {
     
-    public class func available(type: SNSType) -> Bool {
+    private init() {
+    }
+    
+    public class func available(_ type: SNS) -> Bool {
         switch type {
-        case .Twitter:
-            return SLComposeViewController.isAvailableForServiceType(SNSType.Twitter.serviceType)
-        case .Facebook:
-            return SLComposeViewController.isAvailableForServiceType(SNSType.Facebook.serviceType)
-        case .LINE:
-            return UIApplication.sharedApplication().canOpenURL(NSURL(string: "line://")!)
+        case .twitter:
+            return SLComposeViewController.isAvailable(forServiceType: SNS.twitter.serviceType)
+        case .facebook:
+            return SLComposeViewController.isAvailable(forServiceType: SNS.facebook.serviceType)
+        case .line:
+            return UIApplication.shared.canOpenURL(URL(string: "line://")!)
         }
     }
     
-    public class func availableSNSList() -> [SNSType] {
-        return SNSType.list.filter { available($0) }
+    public class func availableSNSList() -> [SNS] {
+        return SNS.list.filter { available($0) }
     }
     
-    public class func post(
-        type type: SNSType,
-        data: SNSShareData,
-        controller: UIViewController,
-        completion: SNSSharePostCompletion = { _ in })
-    {
+    public class func post(_ data: SNSShareData, to type: SNS, controller: UIViewController, completion: @escaping SNSSharePostCompletion = { _ in }) {
         guard available(type) else {
-            completion(.Failure(.NotAvailable(type)))
+            completion(.failure(.notAvailable(type)))
             return
         }
         
         guard !data.isEmpty else {
-            completion(.Failure(.EmptyData))
+            completion(.failure(.emptyData))
             return
         }
         
-        if type.useSocialFramework() {
+        switch type {
+        case .twitter, .facebook:
             postToSocial(type.serviceType, data: data, controller: controller, completion: completion)
-        } else {
-            if case .LINE = type {
-                postToLINE(data, completion: completion)
-            } else {
-                completion(.Failure(.UnknownError))
-            }
+        case .line:
+            postToLINE(data, completion: completion)
         }
     }
     
-    private class func postToSocial(
-        serviceType: String,
-        data: SNSShareData,
-        controller: UIViewController,
-        completion: SNSSharePostCompletion)
-    {
-        let sheet = SLComposeViewController(forServiceType: serviceType)
+    fileprivate class func postToSocial(_ serviceType: String, data: SNSShareData, controller: UIViewController, completion: @escaping SNSSharePostCompletion) {
+        guard let sheet = SLComposeViewController(forServiceType: serviceType) else {
+            completion(.failure(.unknownError))
+            return
+        }
         sheet.completionHandler = { result in
             switch result {
-            case .Done: completion(.Success)
-            case .Cancelled: completion(.Failure(.Cancelled))
+            case .done: completion(.success)
+            case .cancelled: completion(.failure(.cancelled))
             }
         }
         sheet.setInitialText(data.text)
-        data.images.forEach {sheet.addImage($0) }
-        data.urls.forEach { sheet.addURL($0) }
-        controller.presentViewController(sheet, animated: true, completion: nil)
+        data.images.forEach {sheet.add($0) }
+        data.urls.forEach { sheet.add($0) }
+        controller.present(sheet, animated: true, completion: nil)
     }
     
-    
-    private class func postToLINE(data: SNSShareData, completion: SNSSharePostCompletion) {
+    fileprivate class func postToLINE(_ data: SNSShareData, completion: SNSSharePostCompletion) {
         
         var scheme = "line://msg/"
-        if let image = data.images.first, imageData = UIImagePNGRepresentation(image) {
-            let pasteboard = UIPasteboard.generalPasteboard()
+        if let image = data.images.first, let imageData = UIImagePNGRepresentation(image) {
+            let pasteboard = UIPasteboard.general
             pasteboard.setData(imageData, forPasteboardType: "public.png")
             scheme += "image/\(pasteboard.name)"
         } else {
             var texts = [String]()
             texts.append(data.text)
             data.urls.forEach{ texts.append($0.absoluteString) }
-            let set = NSCharacterSet.alphanumericCharacterSet()
+            let set = CharacterSet.alphanumerics
             guard let text = texts
-                .joinWithSeparator("\n")
-                .stringByAddingPercentEncodingWithAllowedCharacters(set) else
+                .joined(separator: "\n")
+                .addingPercentEncoding(withAllowedCharacters: set) else
             {
-                completion(.Failure(.URIEncodingError))
+                completion(.failure(.uriEncodingError))
                 return
             }
             scheme += "text/\(text)"
         }
         
-        guard let url = NSURL(string: scheme) else {
-            completion(.Failure(.UnknownError))
+        guard let url = URL(string: scheme) else {
+            completion(.failure(.unknownError))
             return
         }
         
-        UIApplication.sharedApplication().openURL(url)
-        completion(.Success)
+        UIApplication.shared.openURL(url)
+        completion(.success)
     }
-    
 }
