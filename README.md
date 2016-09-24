@@ -1,20 +1,9 @@
 # SNSShare
-[![Build Status](https://travis-ci.org/sgr-ksmt/SNSShare.svg?branch=master)](https://travis-ci.org/sgr-ksmt/SNSShare)
+[![GitHub release](https://img.shields.io/github/release/sgr-ksmt/SNSShare.svg)](https://github.com/sgr-ksmt/SNSShare/releases)
+[![Build Status](https://travis-ci.org/sgr-ksmt/SNSShare.svg?branch=master)](https://travis-ci.org/sgr-ksmt/SNSShare)  
+![Language](https://img.shields.io/badge/language-Swift%203-orange.svg)  
 [![Carthage Compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![Pod Version](https://img.shields.io/cocoapods/v/SNSShare.svg?style=flat)](http://cocoapods.org/pods/SNSShare)
-[![](https://img.shields.io/badge/Xcode-7.0%2B-brightgreen.svg?style=flat)]()
-[![](https://img.shields.io/badge/iOS-8.0%2B-brightgreen.svg?style=flat)]()
-
-## Warning: iOS9
-Over *iOS9.0*,Requires `LSApplicationQueriesSchemes` for `canOpenURL`.
-If you want to enable sharing to LINE, add `line` to `LSApplicationQueriesSchemes`
-
-```xml
-<key>LSApplicationQueriesSchemes</key>
-<array>
-  <string>line</string>
-</array>
-```
+[![CocoaPods  Compatible](https://img.shields.io/badge/Cocoa%20Pods-compatible-4BC51D.svg?style=flat)](https://cocoapods.org)
 
 # How to use
 
@@ -43,19 +32,20 @@ data.post(.Twitter) { result in
 If a user posted share data, return result `Success` by completion closure.
 else cancelled or other error occurred, return result `Failure`.
 
-### Other methods
-
-- *SNSShare#availableSNSList()*<br>
-Return SNS service list that user can use.
-
-### ErrorType
-- *NotAvailable(SNSType)* If a user cannot share to SNS service.
-- *EmptyData* : If SNSShareData is EmptyData (has no text, image and url).
-- *URIEncodingError* : Failed URI encoding When select *LINE* and share text and URL.
-- *UnknownError*
-
-
 #### **Demo is [here](https://github.com/sgr-ksmt/SNSShare/blob/master/Demo/)**
+
+## Warning: iOS9〜
+Over *iOS9.0*,Requires `LSApplicationQueriesSchemes` for `canOpenURL`.
+If you want to enable sharing to LINE, add `line` to `LSApplicationQueriesSchemes`
+
+```xml
+<key>LSApplicationQueriesSchemes</key>
+<array>
+  <string>line</string>
+</array>
+```
+
+
 
 ## Requirements
 - iOS 8.0+
@@ -83,6 +73,3 @@ github "sgr-ksmt/SNSShare"
 - Run `carthage update`
 - Add the framework as described.
 <br> Details: [Carthage Readme](https://github.com/Carthage/Carthage#adding-frameworks-to-an-application)
-
-### Manual install (for iOS7)
-Clone this repository, then add `SNSShare.swift` to your Xcode Project.
