@@ -73,7 +73,19 @@ open class SNSShareData {
     open var isEmpty: Bool {
         return text.characters.isEmpty && images.isEmpty && urls.isEmpty
     }
-    
+}
+
+extension SNSShareData {
+    public func post(to type: SNS, completion: @escaping SNSSharePostCompletion = { _ in }) {
+        guard let viewController = UIApplication.shared.keyWindow?.rootViewController else {
+            completion(.failure(.unknownError))
+            return
+        }
+        SNSShare.post(self, to: type, viewController: viewController, completion: completion)
+    }
+    public func post(to type: SNS, viewController: UIViewController, completion: @escaping SNSSharePostCompletion = { _ in }) {
+        SNSShare.post(self, to: type, viewController: viewController, completion: completion)
+    }
 }
 
 public class SNSShare {
@@ -96,7 +108,7 @@ public class SNSShare {
         return SNS.list.filter { available($0) }
     }
     
-    public class func post(_ data: SNSShareData, to type: SNS, controller: UIViewController, completion: @escaping SNSSharePostCompletion = { _ in }) {
+    public class func post(_ data: SNSShareData, to type: SNS, viewController: UIViewController, completion: @escaping SNSSharePostCompletion = { _ in }) {
         guard available(type) else {
             completion(.failure(.notAvailable(type)))
             return
@@ -109,13 +121,13 @@ public class SNSShare {
         
         switch type {
         case .twitter, .facebook:
-            postToSocial(type.serviceType, data: data, controller: controller, completion: completion)
+            postToSocial(type.serviceType, data: data, viewController: viewController, completion: completion)
         case .line:
             postToLINE(data, completion: completion)
         }
     }
     
-    fileprivate class func postToSocial(_ serviceType: String, data: SNSShareData, controller: UIViewController, completion: @escaping SNSSharePostCompletion) {
+    fileprivate class func postToSocial(_ serviceType: String, data: SNSShareData, viewController: UIViewController, completion: @escaping SNSSharePostCompletion) {
         guard let sheet = SLComposeViewController(forServiceType: serviceType) else {
             completion(.failure(.unknownError))
             return
@@ -129,7 +141,7 @@ public class SNSShare {
         sheet.setInitialText(data.text)
         data.images.forEach {sheet.add($0) }
         data.urls.forEach { sheet.add($0) }
-        controller.present(sheet, animated: true, completion: nil)
+        viewController.present(sheet, animated: true, completion: nil)
     }
     
     fileprivate class func postToLINE(_ data: SNSShareData, completion: SNSSharePostCompletion) {

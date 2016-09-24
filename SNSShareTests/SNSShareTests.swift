@@ -35,10 +35,5 @@ class SNSShareTests: XCTestCase {
         XCTAssertEqual(sd4.text, "")
         XCTAssertEqual(sd4.urls.count, 1)
         XCTAssertEqual(sd4.urls[0], URL(string: "http://www.google.co.jp")!)
-        
-        
-        
     }
-    
-    
 }
